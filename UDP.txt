@@ -1,0 +1,29 @@
+* UDP
+
+    - Transport Layer Protocol이 할 수 있는 최소 기능으로 동작한다.
+    - Multiplex와 Demultiplex 기능과 간단한 오류 검사 기능만 구현되어 있다.
+    - Application 개발자가 UDP를 선택하는 경우 Application은 IP와 직접 통신하는 것과 비슷하다.
+    - DNS (Domain Name Service)는 대표적으로 UDP를 사용하는 Application Layer Protocol 이다.
+    - UDP는 Segment를 송신하기전에 Transport Layer간 Handshake를 사용하지 않는다.
+
+    - Application Level에서 더 정교한 제어가 가능하다.
+    - Application Process가 Data를 UDP에 전달하자마자, UDP는 Data를 Segment로 만들고 Network Layer로 전달한다.
+    - TCP의 Congestion Control Mechanism이 없기 때문에 손실은 발생할 수 있지만 실시간 서비스에는 적합하다.
+    - 연결 설정 과정이 존재하지 않기 때문에 연결설정을 위한 어떠한 지연도 없다.
+    - 연결상태가 존재하지 않는다.
+    - 작은 Packet Overhead를 가진다
+
+    * UDP Segment Structure
+    [ Source Port   ]   [   Destination Port    ]
+    [   Length      ]   [       CheckSum        ]
+    [           data octets...                  ]
+
+    - Source Port     : 출발지 Port Number를 의미한다.
+    - Destination Port: 도착지 Port Number를 의미한다.
+    - Length          : Header를 포함한 UDP Segment의 길이를 Byte단위로 나타낸다.
+    - Checksum        : 오류가 발생했는지 검사하기 위한 용도로 사용된다.
+
+        * Checksum => Segment가 출발지로부터 목적지로 이동했을때, UDP Segment안의 Bit의 변경사항이 있는지 검사를 수행한다.
+            1. UDP Segment 안에 있는 모든 16bit Word 단위로 더한다.
+            2. 1의 보수를 수행한다.
+            [주의] 덧셈과정에서 발생하는 Overflow에 대해서는 Wrap Around를 수행한다.
