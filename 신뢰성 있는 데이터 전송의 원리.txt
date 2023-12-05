@@ -1,0 +1,75 @@
+* Principles of Reliable Data Transfer
+
+    * Reliable Channel
+        1. 전송된 Data가 손상되지 않는다.
+        2. 전송된 Data가 손실되지 않는다.
+        3. 모든 Data는 전송된 순서대로 전달된다.
+
+    * Reliable Data Transfer 1.0 => Perfectly Reliable Channel
+        1. Data 단위와 Packet 단위의 차이가 존재하지 않는다.
+        2. 모든 Packet의 흐름은 송신자와 수신자간에 발생한다.
+        3. 완전히 신뢰적인 채널 (Perfectly Reliable Channel)이기 때문에 오류가 발생하지 않는다.
+        4. 즉, 수신자는 송신자에게 Feedback을 제공할 필요기 없다.
+        5. 송신자가 Data를 송신하자마자 Data를 수신할 수 있다고 가정했다.
+        6. 즉, 수신자는 송신자에게 Data를 천천히 송신하라고 요청할 필요가 없다.
+
+    * Reliable Data Transfer 2.0 => Channel with Bit Errors
+
+        * ARQ (Automatic Repeat reQuest) Protocol
+        - 재전송을 기반으로 신뢰성있는 Data 전송을 가능하게하는 Protocol이다.
+
+            @. Positive Acknowledgment => Data를 정확하게 수신되었는지 확인하는 용도로 사용
+            @. Negative Acknowledgment => Data가 잘못 수신되어 재전송이 필요하다고 수신자가 송신자에게 알려주는 용도로 사용
+
+            * ARQ Protocol 구현을 위한 3가지의 Additional Protocol Capabilities
+                1. Error Detection
+                    - Error가 발생한 경우 수신자가 Error를 감지해야한다.
+                        - UDP의 경우 Error Detection을 위해 Checksum Field가 존재한다.
+                    - 수신자가 Bit Error를 검출하고 복구할 수 있도록 해준다.
+                    - Error 검출을 위한 추가적인 Bit가 필요하다.
+
+                2. Receiver Feedback
+                    - 일반적으로 송신자와 수신자는 수천 km 떨어진 서로 다른 End System에서 동작한다.
+                    - 송신자가 Packet이 정확히 수신했는지 알기 위해, 수신자가 송신자에게 Feedback을 제공해야한다
+                        - ACK (Acknowledgement)
+                        - NAK (Negative Acknowledgement)
+                3. Re-transmission
+                    - 오류가 있는 Packet은 송신자에 의해 재전송된다.
+
+        * Sending Side => Stop-And-Wait Protocol이라고 한다.
+            - 송신자가 ACK 또는 NAK를 기다리는 상태인 경우, Upper Layer로부터 Data를 전달받을 수 없다.
+            [Case 1] Receiver로부터 NAK Packet을 수신한 경우
+                - Packet을 재전송하고 해당 Packet에 대한 ACK 또는 NAK를 기다린다.
+            [Case 2] Receiver로부터 ACK Packet을 수신한 경우
+                - Upper Layer로부터 Data를 기다리는 상태로 돌아간다.
+
+        * Receiving Side => Packet이 손상되었는지 아닌지에 따라 동작한다.
+            [Corrupt]
+                - NAK Packet (sndpkt)을 생성한다.
+                - 생성된 NAK Packet (sndpkt)을 Channel로 전송한다.
+            [Not Corrupt]
+                - Underlying Channel에서 전달받은 Packet에서 Data를 추출한다.
+                - 추출한 Data를 Upper Layer로 전송한다.
+                - ACK Packet (sndpkt)을 생성한다.
+                - 생성된 ACK Packet (sndpkt)을 Channel로 전송한다.
+
+        [치명적인 결함이 존재]
+            => ACK 또는 NAK Packet이 손상될 수 있다는 가능성을 고려하지 않았다.
+            => Data Packet에 Sequence Number라는 새로운 Filed를 추가해서 문제를 해결한다.
+                - 동일한 Sequence Number => 가장 최근에 수신된 Packet과 동일한 Sequence Number를 갖는 경우, 수신자는 송신자의 Packet 재전송을 인지할 수 있다.
+                - 다른 Sequence Number => 수신자는 송신자로부터 새로운 Packet을 수신했다고 인지할 수 있다.
+
+    * Reliable Data Transfer 3.0: Sending Side => Lossy Channel with Bit Errors
+        * Sending Side
+            1. 어떻게 Packet 손실을 검출할 것인가?
+                - 송신자에게 손실된 Packet의 검출과 회복 책임을 부여할 것이다.
+                [Case1] Packet이 손실된 경우
+                [Case2] ACK가 손실된 경우
+                - 송신자에게는 어떠한 응답도 없다
+            2. Packet 손실이 발생하는 경우 어떤 행동을 할 것인가?
+                - 해당 Packet에 대해 Re-transmission을 수행한다.
+
+            @ Time-Based Retransmission Mechanism을 구현하기 위해, 주어진 시간이 경가된 후 송신자를 Interrupt 할수있는 Counterdown Timer가 필요하다.
+                1. Packet이 송신될 때 타이머를 시작한다.
+                2. Timer Interrupt에 따라 적절한 동작을 수행한다.
+                3. Timer를 중지시킨다.
