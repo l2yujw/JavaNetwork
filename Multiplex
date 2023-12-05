@@ -1,0 +1,61 @@
+* Multiplex and Demultiplex
+
+    * Transport Layer는 Host에서 동작하는 Application Process에게 Segment를 전달하는 의무를 가진다.
+        - Process는 Socket울 가지고 있다.
+        - 각각의 Socket은 유일한 식별자를 가진다. (UDP/TCP)
+        - 수신측 Host의 Transport Layer는 실제로 Data를 직접 Process로 전달하지 않는다!
+        - 수신측 Host의 Transport Layer는 둘 사이의 문 역할을 하는 Socket에게 데이터를 전달한다.
+
+    * Multiplexing
+        - Transport Layer Segment Data를 Network Layer로 전달하는작업
+        - Data encapsulation을 수행한다.
+
+    * Demultiplexing
+        - Transport Layer Segment Data를 올바른 Socket으로 전달하는 작업
+        - Segment Field를 검사해 해당 Socket으로 전달한다.
+
+        @ Socket은 유일한 식별자를 가진다.
+        @ 각 Segment는 Segment가 전달될 Socket을 가리키는 특별한 Field를 가진다.
+            - Source Port Number
+            - Destination Port Number
+        @ 각각의 Port 번호는 16bit 정수이다.(0 - 65535)
+        @ 0 - 1023 까지의 Port를 Well-Known Ports 라고 하여 사용을 엄격하게 제한하고 있다. (Reserved)
+
+* Connectionless
+
+    Transport Layer Segment
+
+        [ Source Port Number ]  [ Destination Port Number ]
+        [               Header Fileds                     ]
+        [           Application Data = Message            ]
+
+
+    [Step 01] Segement Generation
+        [Port: 19157]                                               [Port: 46428]
+        [ Source Port Number ]  [ Destination Port Number ]         [       19157        ]  [           46428         ]
+        [               Header Fileds                     ]         [               Header Fileds                     ]
+        [           Application Data = Message            ]         [           Application Data = Message            ]
+
+    [Step 02] Segment Encapsulation => Segment를 IP Packet으로 Capsulation을 수행한다.
+        [Packet]
+        [   IP Header   ]
+        [   Segment     ] =>    [       19157        ]  [           46428         ]
+                                [               Header Fileds                     ]
+                                [           Application Data = Message            ]
+
+* Connection-Oriented
+    * TCP Socket 생성하기
+        * TCP Socket은 4개의 요소로 식별된다.
+            1. Source IP address
+            2. Destination IP address
+            3. Source Port Number
+            4. Destination Port Number
+        * 다른 Source Address 또는 Source Port Number를 가지는 TCP Segment는 각기 다른 Socket으로 향하게 된다.
+            1. Source Address: 192.168.0.15, Port: 12000
+            2. Source Address: 192.168.0.15, Port: 13000
+            3. Source Address: 192.168.0.20, Port: 14000
+            4. Source Address: 192.168.0.20, Port: 15000
+            - Destination Address: 192.168.0.50, Port: 8000
+
+    * 3개의 Socket (초기 연결 설정 요청을 전달하는 TCP는 제외)연결요청 Segment를 수신하면, 연결을 기다리고 있는 Server Process를 찾는다.
+      그후, Server는 새로운 Socket을 생성한다.

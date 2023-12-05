@@ -21,10 +21,10 @@
     TCP/IP Model
         Message ] Segments ] Datagram or Packets ] Frames
 
-        Application         => [Header+Application]                             (HTTP, FTP, SMTP...)
-        Transport           => [Header+[Header+Application]]                    (TCP, UDP)
-        Internet Protocol   => [Header+[Header+[Header+Application]]]           (IP, ICMP, IGMP...)
-        Network Access Layer=> [Header+[Header+[Header+[Header+Application]]]]  (Ethernet, ARP, OSPF, NDP...)
+        Application (Messages)        => [Header+Application]                             (HTTP, FTP, SMTP...)
+        Transport   (Segments)        => [Header+[Header+Application]]                    (TCP, UDP)
+        Internet Protocol (Packets)   => [Header+[Header+[Header+Application]]]           (IP, ICMP, IGMP...)
+        Network Access Layer (Frames) => [Header+[Header+[Header+[Header+Application]]]]  (Ethernet, ARP, OSPF, NDP...)
 
 
     * UDP ( User Datagram Protocol )
