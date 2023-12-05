@@ -1,0 +1,58 @@
+* Network
+
+    * OSI Model
+    Application ] Presentation ] Session ] Transport ] Network           ] Data Link ] Physical
+
+    * TCP/IP Networking Model
+    Apllication                          ] Transport ] Internet Protocol ] Network Access Layer
+
+    * TCP/IP Protocol Suite
+    Apllication         => HTTP / FTP / SMTP / DNS / RIP / SNMP
+    Transport           => TCP / UDP
+    Internet Protocol   => [IP(v4) ARP / IGMP / ICMP] / [IP(v6) ND / MLD / ICMPv6]
+    Network Access      => Ethernet / 802.11 wireless LAN / Frame Relay / ATM
+
+    * PDU (Protocol Data Unit)
+    OSI Model   => Packet
+        Data ] Data ] Data ] Segments ] Packets ] Frames ] Bits
+
+    RFC         => TCP (Segment) / UDP (Datagram)
+
+    TCP/IP Model
+        Message ] Segments ] Datagram or Packets ] Frames
+
+        Application         => [Header+Application]                             (HTTP, FTP, SMTP...)
+        Transport           => [Header+[Header+Application]]                    (TCP, UDP)
+        Internet Protocol   => [Header+[Header+[Header+Application]]]           (IP, ICMP, IGMP...)
+        Network Access Layer=> [Header+[Header+[Header+[Header+Application]]]]  (Ethernet, ARP, OSPF, NDP...)
+
+
+    * UDP ( User Datagram Protocol )
+        - Unreliable - 비신뢰적
+        - Connectionless Service - 비연결형서비스
+
+        - 하나의 Process에 의해서 전송된 데이터가 손상되지 않고 목적지 Process에 도착한다는 것을 보장하지 않는다.
+        1. Process 간의 데이터 전달기능을 제공한다.
+        2. Header에 오류 검출 필드를 포함 - 무결성 검사를 제공
+        3. Traffic 제어가 불가능하다. -  Application이 허용하는 어떠한 속도로도 전송이 가능하다.
+
+    * TCP ( Transmission Control Protocol )
+        - Reliable - 신뢰적
+        - Connection-Oriented Service - 연결지향형 서비스
+
+        - 하나의 Process에 의해서 전송된 데이터가 손상되지 않고 목적지 Process에 도착한다는 것을 보장한다.
+        1. Process 간의 데이터 전달 기능을 제공한다.
+        2. 흐름제어
+        3. 순서번호
+        4. 확인응답
+        5. 타이머
+        6. 혼잡제어
+            - 전체를 위한 일반 Service
+            - Switch와 Link의 폭주 방지
+            - 송식측의 TCP와 Traffic을 조절
+
+    * IP
+        1. Best-Effort Delivery Service Model
+        2. Segment 전달을 위해 최대한 노력하지만 어떠한 보장도 하지 않는다.
+        3. Segment가 순서대로 전달되는 것을 보장하지 않는다.
+        4. Segment 내부데이터의 무결성(Integrity)을 보장하지 않는다.
