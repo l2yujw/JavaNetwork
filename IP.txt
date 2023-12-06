@@ -1,0 +1,142 @@
+* Internet Protocol
+
+    * Datagram Format => TCP/IP Protocol에서 Network Layer의 Packet을 Datagram이라고 한다.
+
+        [Version] [Header] [Type of Service ] [      Datagram Length (bytes)      ]
+        [       16-bit Identifier           ] [Flags] [13-bit Fragmentation offset]
+        [Time-to-live] [Upper-layer protocol] [         Header checksum           ]
+        [                       32-bit Source IP address                          ]
+        [                       32-bit Destination IP address                     ]
+        [                           Options (if any)                              ]
+        [                               Data                                      ]
+
+        * Version => 4bit로 Datagram의 IP Protocol Version을 명시한다.
+            - Router는 Version을 확인하여 Datagram을 어떻게 해설할지 결정한다.
+              ☑ IPv4
+              ☑ IPv6
+
+        * Header Length => 4bit로 Datagram의 IP Protocol Version을 명시한다.
+            - IPv4 Datagram은 Header에 가변 길이의 Option을 포함한다.
+                ☑ IP Datagram에서 실제 Payload가 시작하는 곳을 결정한다.
+                ☑ 예를들어, Datagram에 캡슐화 된 Transport Layer Segment를 의미한다.
+            - 대부분의 IPv4 Datagram은 Option을 포함하지 않는다.
+                ☑ 대체로 IPv4 Datagram Header는 20 byte이다
+
+        * Type of service (TOS) => 서로 다른 유형의 IP Datagram을 구별한다.
+            - 서로 다른 유형의 IP Datagram을 구별한다.
+                ☑ 예를 들어, 실시간과 비 실시간 Datagram의 Traffic을 구별하는데 유용하다.
+                ☑ 예를 들어, Datagram에 캡슐화 된 Transport Layer Segment를 의미한다.
+            - 제공될 Service Level은 네트워크 관리자가 결정하고 구성할 정책 (Policy) 문제이다.
+            - Bit 중 두개는 명시적 혼잡 통지 (Explicit Congestion Notification)에 사용된다.
+
+        * Datagram Length => Byte로 계산한 IP Datagram의 전체 길이이다.
+            - Byte로 계산한 IP Datagram의 전체 길이이다.
+                ☑ Header와 Data를 포함한 길이를 의미한다.
+            - Field의 크기가 16bit이므로 이론상 최대 길이는 65,535byte이다.
+            - 제공될1500byte보다 큰 경우는 거의 없다.
+                ☑ 최대 크기의 Ethernet Frame의 Payload에 IP Datagram이 장착될 수 있다.
+
+        * Identification, Flags, Fragment offset
+            => Identification, Flags, Fragment offset Field는 IP Datagram Fragment와 관련이 있다.
+
+            - IP Datagram Fragment와 관련이 있는 3개의 Field
+                ☑ Identification
+                ☑ Flags
+                ☑ Fragment offset
+            - IPv6는 Fragment를 허용하지 않는다
+
+        * Time-to-live (TTL) => Network에서 Datagram이 무한히 순환하지 않도록하는 역할을 수행한다.
+            - Network에서 Datagram이 무한히 순환하지 않도록하는 역할을 수행한다.
+                ☑ Long-lived routing loop
+            - TTL Field는 Router가 Datagram을 처리할 때마다 감소한다.
+            - TTL Field가 0이 되면 Router가 Datagram을 폐기한다.
+
+        * Upper-layer Protocol => IP Datagram에서 Data가 전달될 목적지의 Transport Layer의 Protocol을 명시한다.
+            - IP Datagram에서 Data가 전달될 목적지의 Transport Layer의 Protocol을 명시한다.
+                ☑ UDP: 17 ☑ TCP: 6
+            - Transport Layer Segment의 Port 번호와 비슷한 역할을 수행한다.
+            - Network Layer와 Transport Layer를 묶어준다고 생각하면 쉽다
+
+        * Header Checksum => Router가 수신하 IP Datagram의 bit 에러를 탐지하는데 도움을 준다.
+            - IP Datagram에서 Data가 전달될 목적지의 Transport Layer의 Protocol을 명시한다.
+                ☑ Router는 보통 오류가 검출된 Datagram을 폐기한다.
+            - Router를 지나면서 TTL과 Option field의 값이 변경된다.
+            - Checksum은 각 Router에서 재계산되고 갱신되어야 한다.
+
+        * Source & Destination IP address
+            - 출발지가 Datagram을 생성할 때
+                ☑ 자신의 IP 주소를 Source IP Address Field에 삽입한다.
+                ☑ 목적지의 IP 주소를 Destination IP Address Field에 삽입한다.
+            - 종종 Host는 DNS 검색을 통해 Destination IP Address를 결정한다.
+
+        * Option
+            - Option Field를 사용하면 IP 헤더를 확장할 수 있다.
+            - Option Field는 거의 사용되지 않는다.
+                ☑ Datagram Header에 모든 정보를 포함하지 않음으로써 Overhead를 줄일 수 있기 때문이다.
+            - Option 처리 유무에 따라 Router에서 IP Datagram을 처리하는데 필요한 시간이 크게 달라질 수 있다.
+            - Datagram Header의 길이가 가변적일 수 있기 때문에 Data Field가 시작될 위치를 초기에 결정할 수 없다.
+
+        * Data
+            - 대부분의 경우 IP Datagram의 Data Field는 목적지에 전달하기 위해 Transport Layer의 Segment를 포함한다.
+            - IP Datagram의 Data Field에 ICMP와 같은 다른 유형의 데이터를 담기도 한다
+
+
+    * IP Datagram Fragmentation => 모든 Link Layer Protocol이 같은 크기의 Network Layer Packet을 전달할 수 있는건 아니다.
+
+        - 모든 Link Layer Protocol이 같은 크기의 Network Layer Packet을 전달할 수 있는건 아니다.
+            ☑ Ethernet frame: 최대 1,500 byte 전달 가능
+            ☑ WLAN (802.11) frame: 최대 7,981 byte 전달 가능
+        - Link Layer Frame이 전달할 수 있는 최대 데이터 양을 MTU (Maximum Transmission Unit)라고 부른다.
+        - 문제점
+            ☑ 송신자와 목적지 간의 경로를 연결하는 각 Link가 다른 Link Layer Protocol을 사용할 수 있다.
+            ☑ 즉, 각각의 Protocol Layer가 서로 다른 MTU를 가질 수 있다.
+
+        - Router는 서로 다른 MTU를 가진 Link Layer Protocol을 사용할 수 있다.
+        - 한 Link에서 IP Datagram을 수신한 경우
+            ☑ Outgoing Link를 결정하기 위해 Forwarding Table을 검사한다.
+        - Outgoing Link가 IP Datagram의 길이보다작은 MTU를 가지는 경우 어떻게 해야할까?
+            ☑ IP Datagram의 Payload를 두 개 이상의 크기가 더 작은 IP Datagram으로 분할한다.
+            ☑ 해당 Datagram을 별도의 Link Layer Frame으로 캡슐화하여 Outgoing Link로 보낸다.
+            ☑ 이러한 각각의 Datagram을 Fragment라고 한다.
+        - Network Core를 간단하게 유지하는 원칙을 고수하기 위해 IPv4 설계자는 Router가 아닌 End System에서 Datagram 재결합을 하도록 설계하였다.
+
+        @ 목적지 Host가 Fragment를 결합할 수 있도록 Header에 Identification, Flags, Fragment offset Field들을 추가하였다.
+            - 목적지 Host가 Fragment를 결합할 수 있도록 Header에 Identification, Flags, Fragment offset Field들을 추가하였다.
+                ☑ Ethernet frame: 최대 1,500 byte 전달 가능
+                ☑ WLAN (802.11) frame: 최대 7,981 byte 전달 가능
+            - Link Layer Frame이 전달할 수 있는 최대 데이터 양을 MTU (Maximum Transmission Unit)라고 부른다.
+            ! 문제점
+                ☑ 송신자와 목적지 간의 경로를 연결하는 각 Link가 다른 Link Layer Protocol을 사용할 수 있다.
+                ☑ 즉, 각각의 Protocol Layer가 서로 다른 MTU를 가질 수 있다
+
+
+        * IP fragmentation and reassembly
+            - 목적지 Host가 Fragment를 결합할 수 있도록 Header에 Identification, Flags, Fragment offset Field들을 추가하였다.
+            - 일반적으로 송신 Host는 전송하는 각각의 Datagram마다 Identification 번호를 증가시킨다.
+            - 어떤 Datagram이 Fragment인지 결정하기 위해 Datagram의 Identification을 확인한다.
+            - IP는 신뢰할 수 없는 서비스를 제공하므로 마지막 Fragment를 수신했는지 확인하기 위해 Flag bit를 사용한다.
+                    ☑ 마지막 Fragment인 경우: 0 ☑ 마지막 Fragment가 아닌 경우: 1
+            - Offset Field는 Fragment의 분실여부를 판단하거나 적절한 순서로 Fragment를 재결합하기 위해서 사용한다.
+                ☑ 즉, Offset Field는 Fragment의 위치를 명시하기 위해서 사용된다.
+
+    * IPv4 Addressing
+        - IP Address는 32bit로 구성되어 있다.
+            ☑ 대력 2 개의 주소 표현이 가능하다. (대략 40억 개의 주소 표현 가능) 32
+        - 모든 Host와 Router의 각 Interface는 고유한 IP Address를 갖는다. (단, NAT 뒤의 Interface들은 제외)
+
+        * IPv4 Addressing - Subnet => Host들의 Interface들이 하나의 Router Interface로 연결된 Network를 Subetnet이라고 한다.
+            - 각각의 Router는 모두 3개의 Interface를 갖는다.
+                ☑ 각각의 Router를 연결하는 Point-to-Porint: 2개
+                ☑ 호스트를 연결하는 Broadcast Link: 1개
+            - Host나 Router에서 Interface를 분리하여 고립된 Network를 구성한다.
+            - 이렇게 고립된 Network 각각을 Subnet이라고 한다.
+
+        * IPv4 Addressing - Classless Interdomain Routing
+            => CIDR은 Subnet 주소체게 표기를 일반화하고 있다.
+
+
+        * InetAddress => https://docs.oracle.com/javase/8/docs/api/java/net/InetAddress.html
+            - JAVA에서는 IP Address와 관련하여 InetAddres Class를 제공한다.
+            - JAVA에서는 IP Address Version 별로 Class를 제공한다.
+                * IPv4 - Inet4Address Class => https://docs.oracle.com/javase/8/docs/api/java/net/Inet4Address.html
+                * IPv6 - Inet6Address Class => https://docs.oracle.com/javase/8/docs/api/java/net/Inet6Address.html
