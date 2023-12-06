@@ -1,0 +1,56 @@
+* TCP
+
+    * Application Process가 Data를 다른 Process로 전송하기 전에 Handshake를 수행해야 한다.
+    * Handshake를 수행해야 하므로 Connection-oriented라고 한다.
+
+    * FDM (Frequency Division Multiplexing)
+        - Link의 Frequency Spectrum을 공유한다.
+        - 각 연결에 대해 고정된 Frequency Band를 제공한다.
+        - FM 라디오 방송도 Frequncy Spectrum을 공유한다.
+        - MBC: 91.9MHz
+        - SBS: 107.7MHz
+
+    * TDM (Time Division Multiplexing)
+        - 시간을 일정 주기의 Frame으로 구분한다.
+        - 각 Frame은 고정된 개수의 Slot으로 나눈다.
+        - TDM 회선에서의 전송률
+            ☑ Link: 초당 8,000 Frame 전송
+            ☑ Slot: 8bit로 구성
+            ☑ Slot 안의 Bit 수 x Frame 전송률 = 8,000 x 8bit = 64,000bit = 64Kbps
+
+        * 전송시간은 Link의 수와 무관하다! 즉, 100개의 Link를 지나더라도 10초이다.
+
+    * The TCP Connection
+        - Application Process가 Data를 전송하기 전에 Process가 서로 Handshake를 수행해야한다.
+
+        - TCP에서의 연결은 Circuit-Switched Network의 TDM이나 FDM이 아니다.
+
+        - 연결 상태가 End System에만 존재하므로 Virtual Circuit Network도 아니다.
+
+        - TCP Protocol은 오직 End System에서만 동작하기떄문에, 중간의 Network 요소들은 TCP 연결 상태를 유지하지 않는다.
+            ☑ Router ☑ Bridge ☑ Switch
+
+        - 사실 중간 Router들은 TCP 연결을 전혀 감지하지 못한다.
+            ☑ 즉, TCP 연결을 감지하지 못하고 단순히 Datagram만 확인한다.
+
+        - Full Duplex Service를 제공한다.
+
+        - TCP Connection은 항상 단일 송신자와 단일 수신자 사이의 Point-to-Point이다.
+            ☑ 한 송신자가 여러 수신자에게 데이터를 전송하는 Multicasting이 불가능하다.
+
+        * 3-Way Handshake
+            - Client Application Process가 Server Process와 연결 설정하기를 원한다고 자신의 Transport Layer에게 알린다.
+            - Client의 Transport Layer은 Server의 TCP와 TCP 연결 설정을 진행한다.
+            - Client가 먼저 특별한 TCP Segment를 전송한다.
+            - Server는 두 번째 특별한 TCP Segment로 응답한다.
+            - Client가 세 번째 특별한 TCP Segment로 다시 응답한다.
+
+        [ Process writes data ]                         [ Process reads data ]
+            [ Socket ]                                        [ Socket ]
+        [    TCP send buffer  ]   ---> Segment ---->    [ TCP receive buffer ]
+
+        - TCP 연결이 설정되면 Application Process간 데이터 전송이 가능하다.
+        - TCP는 초기 3-way Handshake 동안 준비된 Send Buffer로 Data를 보낸다.
+        - TCP should “send that data in segments at its own convenience.”
+        - Segment의 크기는 Maximum Segment Size (MSS)로 제한된다.
+        - Client가 먼저 특별한 TCP Segment를 전송한다.
