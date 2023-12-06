@@ -73,3 +73,26 @@
                 1. Packet이 송신될 때 타이머를 시작한다.
                 2. Timer Interrupt에 따라 적절한 동작을 수행한다.
                 3. Timer를 중지시킨다.
+
+    * The TCP Connection => rdt3.0은 Stop-and-Wait Protocol로 인해 성능 문제가 발생한다.
+
+        @ 가정
+            ☑ 수신자는 Data Packet의 마지막 Bit가 수신되자 ACK Packet을 송신할 수 있다.
+            ☑ ACK Packet은 크기가 매우 작아 전송 시간을 무시할 수 있다.
+
+        * Network Protocol이 하위 Network Hardware가 제공하는 기능/능력을 제한할 수 있다.
+            - 지연이 증가하고 성능이 더욱 나빠진다
+
+        * Pipelining
+            - 확인응답 (Acknowledgements)을 기다리지 않고 여러 Packet을 전송하도록 허용하는 방식을 사용한다.
+            Ex> ACK를 기다리기 전에 Sender가 3개의 Packet을 전송하도록 허용 => Utilization이 3배 증가한다
+
+            - Sequence Number의 범위가 커져야한다.
+                ☑ 각각의 전송 중인 Packet은 유일한 Sequence Number를 가져야한다.
+                ☑ 전송 중이고 확인 응답이 안된 여러 Packet이 있을지도 모르기 떄문이다.
+
+            - Protocol의 Sender와 Receiver은 하나 이상의 Packet을 Buffering 해야한다.
+                ☑ 최소한 Sender는 ACK을 받지 못한 Packet을 Buffering 해야한다.
+            - Plpelining 오류 회복의 두 가지 기본적인 접근방법이 있다.
+                ☑ Go-Back-N (GBN) => ACK를 기다리지 않고 여러 Packet 전송이 가능하다.
+                ☑ Selective Repeat (SR)
