@@ -1,0 +1,163 @@
+* Router
+
+    * Router Architecture
+                     [Routing processor]
+    [ Input port ] -> [ Switch fabric ] -> [ Output port ]
+
+    * Input Port
+        - Router의 Physical Link 종단에서 Physical Layer 기능을 수행한다.
+        - Input Link의 반대편에 위치한 Link Layer와 상호 운용 (Interoperability)하기 위해 필요한 Link Layer 기능을 수행한다.
+        - Input Port에서 Lookup 기능을 수행하는 점이 가장 중요하다.
+            ☑ Forwarding Table을 참조하여 Switch Fabric를 통해 전달되는 Packet의 Router Output Port를 결정한다.
+            ☑ Control Packet은 Input Port에서 Routing Processor로 전달된다.
+
+    * Switching Fabric
+        - Router의 Input Port와 Output Port를 연결한다.
+        - Network Router의 내부 Network이다.
+
+    * Output Port
+        - Switch Fabric으로부터 수신한 Packet을 저장하고 필요한 Link Layer와 Physical Layer 기능을 수행하여 Output Port로 Packet을 전송한다.
+        - Link가 양방향 (Bi-Directional)일 경우 Output Port는 일반적으로 동일한 Link의 Input Port와 쌍을 이룬다.
+            ☑ 공유기의 Port가 Input/Output 모두 수행하는 상황을 생각하면 이해하기 쉽다.
+
+    * Routing Processor
+        - Routing Processor는 Control Plane 기능을 수행한다.
+        - Traditional Router
+            ☑ Routing Protocol을 수행하고 Routing Table과 연결된 Link State 정보를 유지하고 관리하여 Router의 Forwarding Table을 계산한다.
+        - SDN Router
+            ☑ Routing Processor는 Remote Controller와 통신하여 Remote Controller에서 계산된 Forwarding Table을 수신한다.
+            ☑ Router Input Port에 Forwarding Table 항목을 설치한다.
+
+
+    * Input Port Processing and Destination => Based Forwarding
+        - Packet을 Switching할 Output Port가 각 Packet의 Destination 주소를 기반으로하는 가장 단순한 경우
+            ☑ 32bit의 IP Address인 경우, Forwarding Table을 구현하기 위해서는 목적지 주소마다 하나의 Entry가 필요하다.
+            ☑ 2 개의 Entry가 필요하다. (약 40억개)
+
+        - Router는 Packet의 Destination Address의 Prefix를 Forwarding Table의 Entry와 Match 시킨다.
+
+            ex)
+                Prefix Match                Link Interface
+                1101000 00010111 00010             0
+                1101000 00010111 00011000          1
+                1101000 00010111 00011             2
+                otherwise                          3
+
+                1. Destination Address인 200.23.22.161을 살펴본다.
+                    - Forwarding Table에서 대응되는 Entry를 검색한다.
+                        ☑ (1101000 00010111 00010)110 10100001
+                        ☑ Link Interface 0으로 해당 Packet을 전달한다.
+
+                2. Destination Address인 200.23.32.5를 살펴본다.
+                    - (1101000 00010111 00)100000 00000101
+                        ☑ Forwarding Table에서 대응되는 Entry를 검색한다.
+                        ☑ 일치되는 Prefix가 존재하지 않으므로 Link Interface 3으로 해당 Packet을 전달한다.
+
+                3. Destination Address인 200.23.24.170를 살펴본다.
+                    - (1100100 00010111 00011)000 10101010   - (1100100 00010111 00011000) 10101010
+                        ☑ Forwarding Table에서 대응되는 Entry를 검색한다.
+                        ☑ Longest Prefix Matching Rule을 적용한다.
+                        ☑ Link Interface 1으로 해당 Packet을 전달한다.
+
+    * Switching
+        - Switching Fabric을 통해 Packet이 Input Port에서 Output Port로 Switching (= Forward) 되므로 Switching Fabric은 Router의 핵심이다.
+
+        * Switching via Memory
+            - 초기 Router는 CPU (Routing Processor)가 직접 제어하여 Input Port와 Output Port간 Switching을 수행하는 Computer였다.
+            - Packet이 Input Port에 도착
+                ☑ Input Port는 Routing Process에게 Interrupt를 보내 Packet을 Processor Memory에 복사한다.
+                ☑ Routing Processor는 Header에서 Destination Address를 추출하고 Forwarding Table에서 적절한 Output Port를 Lookup한다.
+                ☑ Output Port의 Buffer에 Packet을 복사한다.
+            - Memory Bandwidth 초당 최대 B인 Packet을 Memory에 Write하거나 Read하는 경우
+                ☑ Overall Forwarding Throughput은 반드시 B/2보다 작아야한다.
+                ☑ Output Port가 다르더라도 Shared System Bus를 통해 한번에 하나의 Memory Read/Write 작업을 수행 할 수 있기 때문에 두 Packet을 동시에 Forward 할 수 없다.
+
+        * Switching via Bus
+            - Input Port는 Routing Processor의 개입 없이 Shared Bus를 통해 직접 Output Port로 Packet을 전달한다.
+            - 일반적으로 Input Port가 Local Output Port를 나타내는 Packet에 Switch Internal Label을 추가하고 Packet을 Bus로 전송함으로써 수행됩니다.
+            - 모든 Output Port에 Packet이 수신되지만 Label이 일치하는 Port만 Packet을 유지한다.
+            - Label은 Switch 내에서 Bus를 통과하기 위해서만 사용되므로 Output Port에서 제거된다.
+            - 동시에 여러 Packet이 다른 Input Port로 도착하면 한번에 하나의 Packet만 Bus를 통과할 수 있기 때문에 나머지 Packet은 대기해야한다.
+            - 모든 Packet이 하나의 Bus를 통과해야 하므로, Route의 Switching Speed는 Bus Speed에 의해 제한된다.
+
+        * Switching via an Interconnection Network
+            - Shared Bus의 Bandwidth 한계를 극복하는 한 가지 방법
+                ☑ Multiprocessor Computer Architecture에서 Processor를 Interconnect하기 위해 사용되었던 것과 같은 더 정교한 Interconnection Network를 사용하는 것이다.
+            - Crossbar Switch는 N개의 Input Port를 N개의 Output Port에 연결하는 2N개의 Bus로 구성된 Interconnection Network이다.
+            - 각 Vertical Bus는 Crosspoint에서 각 Horizontal Bus와 교차하면서 Switch Fabric Controller에 의해서 언제든지 Open 되거나 Close 될 수 있다.
+
+            - Packet이 Input Port A에 도착하여 Output Port Y로 Forwarding 하는 경우
+                ☑ Switch Controller는 Bus A와 Bus Y가 교차하는 Crosspoint를 Close한다.
+                ☑ Input Port A는 Packet을 Bus로 전송하고 Bus Y에 의해서만 Pick Up된다.
+
+            - Packet이 Input Port B에 도착하여 Output Port X로 Forwarding 하는 경우
+                ☑ Switch Controller는 Bus B와 Bus X가 교차하는 Crosspoint를 Close한다.
+                ☑ Input Port B는 Packet을 Bus로 전송하고 Bus X에 의해서만 Pick Up된다.
+
+            - Crossbar Switch는 여러 Packet을 병렬 (Parallel)로 Forwarding 할 수 있다.
+            - Crossbar Switch는 non-blocking이다.
+            - 다른 Packet이 해당 Output Port로 전달되고 있지 않는 한, Output Port로 전달되는 Packet은 해당 Output Port에 Forwarding되는 것이 Block되지 않는다.
+
+    * Output Port Processing
+        - Output Port의 Memory에 저장된 Packet을 가져와서 Output Link를 통해 전송한다.
+            ☑ 전송을 위한 Packet Selecting과 De-queueing Packets 기능을 수행해야한다.
+            ☑ 필요한 Link Layer 및 Physical Layer 전송 기능을 수행해야한다.
+
+    * Where Does Queuing Occur?
+        - Packet Queue는 Input Port와 Output Port 양쪽에 존재할 수 있다.
+        - Queue의 위치와 크기 (Input Port Queue 또는 Output Port Queue)는 Traffic Load, Switching Fabric의 상대 속도 및 Line 속도에 따라 달라집니다.
+            ☑ Queue의 Size가 더 커지는 경우 Router의 Memory가 고갈될 수 있다.
+            ☑ Packet을 저장할 수 있는 Memory가 없을 때 Packet Loss가 발생한다.
+        - Packet들이 실제로 폐기되고 손실되는 되는 곳이 바로 Router 내의 Queue이다
+
+        * Input Queueing
+            - Switch Fabric이 Delay 없이 Fabric을 통해 도착하는 모든 Packet을 전송할 만큼 충분히 빠르지 않으면 (Input Line Speed에 비해) 어떻게 될까?
+            - 이 경우 Packet Queuing이 Input Port에서 발생할 수 있다.
+                ☑ Packet은 Switching Fabric을 통해 Output Port로 전송될 차례를 기다리기 위해 Input Port Queue에 삽입되어야 하기 때문이다.
+
+            - Crossbar Switching Fabric을 통해 Queuing의 결과를 살펴보자.
+            - 모든 Link의 Speed는 동일하다.
+            - Input Link에서 Packet을 수신하는 데 걸리는 시간과, 하나의 Packet이 Input Port에서 지정된 Output Port로 전달하는 시간이 동일하다.
+            - FCFS (First Come, First Served) 방식으로 Packet은 Input Queue에서 지정된 Output Queue로 이동된다.
+            - Output Port가 다르면 여러 개의 Packet이 Parallel 하게 전달될 수 있다.
+                ☑ 예를들어, 두 Packet이 같은 Output Queue로 향한다면 이 중 한 Packet은 차단되고 Input Queue에서 기다려야한다.
+                ☑ 즉, Switching Fabric은 한번에 하나의 Packet만 지정된 Output Port로 전송이 가능하다.
+
+        * Output Queueing
+            ☑ R 가 보다 N배 빠르며 N개의 Input Port에 도착하는 Packet들이 동일한 Output Port로 향한다고 가정하자. switch Rline
+            ☑ Output Port는 오직 단일 Packet만 전송 가능하기 때문에 N개의 Packet은 Output Link를 통해 전송하기 위해 대기해야한다.
+            ☑ Packet을 저장할 Buffer Memory가 충분하지 않은 경우 Packet을 Drop 할지 (Drop-Tail)이미 도착한 Packet을 제거할 것인지 결정해야한다.
+            ☑ 이 경우 Buffer가 가득 차기 전에 Packet을 폐기 하거나 Header를 Marking하여 송신자에게 Congestion Signal을 제공하는게 바람직하다.
+            ☑ Active Queue Management (AQM) Algorithm으로 알려진 많은 Packet-Dropping Policy 및 Packet-Marking Policy가 존재한다.
+
+    * Packet Scheduling
+        - Router에서 일반적으로 사용되는 Queuing Discipline은 흔히 FIFO (First In, First Out)로 알려져있는 FCFS (First Come, First Served) 방식이다.
+
+        * First-in-First-Out
+            - Link가 현재 다른 Packet을 전송하고 있는 중이라 바쁠 때 Link Output Queue에 도착한 Packet은 전송을 기다린다.
+            - 도착한 Packet을 담을 Buffer 공간이 충분하지 않은 경우의 Packet Discard Policy
+                    ☑ 전송받은 Packet을 Drop (lost) 시킨다.      ☑ 다른 Packet을 제거한다.
+            - FIFO 또는 FCFS Scheduling 규칙은 Output Link Queue에 도착한 순서와 동일한 순서로 Output Link에서 전송할 Packet을 선택한다.
+            - FIFO에서 Packet은 도착한 순서와 동일한 순서로 나가게 된다.
+
+        * Priority Queuing
+            - Output Link에 도착한 Packet이 Queue에 도착하면 Priority Class로 분류된다.
+            - Network Operators는 Network Management Information을 운반하는 Packet을 User Traffic보다 우선순위를 가지도록 설정 할 수 있다.
+                    ☑ UDP/TCP Port에 의한 식별           ☑ VoIP Packet이 SMTP Packet 보다 우선 처리되도록 설정
+            - 각 Priority Class에는 일반적으로 고유한 Queue가 존재한다.
+            - 전송대기 중인 Packet이 존재하는 가장 높은 Priority Class를 가진 Queue에서 전송할 Packet을 선택한다
+
+        * Round Robin
+             - Round Robin Queuing Discipline에서 Packets은 Priority Queuing과 같이 Class로 분류된다.
+             - 그러나 Class 간 엄격한 Service Priority가 존재하지 않는다.
+                ☑ Round Robin Scheduler가 Class간의 Service를 번갈아 가면서 제공한다.
+             - Work-Conserving Queuing Discipline에서는 전송을 위해 Queue에서 기다리는 Packet이 있다면, Link가 Idle 상태가 되는 것을 허용하지 않는다.
+                ☑ Class에서 Packet을 찾지만 아무것도 찾지 못하면 Round Robin Sequence의 다음 Class를 즉시 확인한다
+
+        * Weighted Fair Queuing (WFQ)
+            - Router에 널리 구현된 Round Robin Queuing의 일반적인 형태는 Weighted Fair Queuing (WFQ) Discipline로 불린다.
+            - 도착한 Packet은 적절한 Class 별 Waiting Area에서 분류되며 기다린다.
+            - Round Robin Scheduling과 같이 Circular Manner로 동작한다.
+            - WFQ는 Work-Conserving Queuing Discipline이며, 빈 Class Queue를 찾는다면 Service Sequence에서 다음 Class로 즉시 이동한다.
+                ☑ WFQ는 각 Class마다 다른 서비스 시간을 부여받는다는 점에서 Round Robin과 차이가 있다.
+            - WFQ는 Work-Conserving Queuing Discipline이며, 빈 Class Queue를 찾는다면 Service Sequence에서 다음 Class로 즉시 이동한다.
