@@ -1,0 +1,25 @@
+* Network Layer
+
+    * Network Layer => 송신 Host에서 수신 Host로 Packet을 전달하는 역할을 수행한다.
+
+        - Forwarding
+            ☑ Packet이 Router의 Input Link에 도착했을 때 Router는 Packet을 적절한 Out Link로 이동시켜야 한다.
+            ☑ Network Layer의 Data Plane에서 실행된다.
+        - Routing
+            ☑ 송신자가 수신자에게 Packet을 전송할 때 Network Layer은 Packet의 경로 (Route or Path)를 결정해야한다.
+            ☑ 이러한 경로를 계산하는 Algorithm을 Routing Algorithm이라고 한다.
+            ☑ Network Layer의 Control Plane에서 실행된다.
+        - Network Layer에서 Forwarding과 Routing의 의미가 혼용되기도 한다
+
+        * Forwarding Table
+            ☑ Router는 도착한 Packet의 Header Field 값을 이용하여 Packet을 Forwarding한다.
+            ☑ 이 값이 Router의 Forwarding Table의 Index로 사용되며 Forwarding Table Entry에 저장된다.
+            ☑ Forwarding Table Entry에 저장된 Header Value는 Packet이 전달되어야 할 Router의 Out Link Interface를 나타낸다.
+
+            * Control Plane: The Traditional Approach
+            * Control Plane: The SDN Approach
+                - 첫 Forwarding Table
+                    ☑ Router는 도착한 Packet의 Header Field 값을 이용하여 Packet을 Forwarding한다.
+                    ☑ 이 값이 Router의 Forwarding Table의 Index로 사용되며 Forwarding Table Entry에 저장된다.
+                    ☑ Forwarding Table Entry에 저장된 Header Value는 Packet이 전달되어야 할 Router의 Out Link Interface를 나타낸다.
+
