@@ -1,0 +1,36 @@
+* Socket
+
+    * Socket Programming
+        - java.net package를 이용하면 Network Application을 쉽게 작성할 수 있다.
+            ☑ 하지만 Network 관련 지식이 필요하다!
+        - 필요 지식
+            ☑ 하지만 Network 관련 지식이 필요하다!
+            ☑ TCP/IP Networking Model에 대한 이해
+            ☑ TCP/UDP가 Network Application 개발하는데 중요하다
+
+        * Socket API Flow
+            [Server]                           [Client]
+            Socket()                           Socket()
+            bind()
+            listen()
+                  <----------연결요청---------  connect()
+            accept()
+            read()/write() <--Data 송수신--->   write() / read() //Stream을 잘 다뤄야 한다
+            close()                            close()
+
+
+    * TCP Echo Server => TCP 기반 Socket Programming을 위해 Java에서 ServerSocket Class를 제공한다.
+
+        * ServerSocket => https://docs.oracle.com/javase/8/docs/api/java/net/ServerSocket.html
+            - Server Socket을 구현하는 Class이다.
+            - Server Socket은 Network를 통해 들어오는 Request를 기다린다.
+            - Server Socket의 실제 작업은 SocketImpl Class의 Instance에 의해 수행됩니다.
+            - Application은 소켓 구현을 생성하는 socket factory를 변경하여 로컬 방화벽에 적합한 소켓을 생성하도록 구성할 수 있습니다.
+
+            - Server Socket에 Address 및 Port 할당을 하기 위해서 bind() method를 이용한다.
+
+    * TCP Echo Client => Client Socket을 생성하기 위해 Socket Class는 다양한 Constructor를 제공한다.
+            - https://docs.oracle.com/javase/8/docs/api/java/net/Socket.html
+
+            - 전송 및 수신하기 원하는 Data에 적합한 Stream을 선택해서 사용한다.
+            - Socket의 Address 와 Port 정보를 제공합니다. Local은 Endpoint를 의미합니다.
