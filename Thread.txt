@@ -1,0 +1,117 @@
+* Thread
+
+    * Process와 Thread - Process에서 실제로 작업을 수행하는 것은 Thread이다.
+
+        * Process
+            - Program을 실행하면 Operating System (OS)은 실행에 필요한 자원을 할당받아 Process가 된다.
+            - Process의 자원을 이용해서 실제로 작업을 수행하는 것은 Thread이다.
+            - 모든 Process는 최소한 하나 이상의 Thread가 존재한다.
+            - Process가 가질 수 있는 Thread의 개수는 제한되어 있지 않다.
+            - Thread가 작업을 수행하는 데 개별적인 Memory 공간인 Call Stack을 필요로 하기 때문에 Memory에 의존적이다.
+
+    * Thread 구현
+
+        * Thread Class를 상속받아 구현하는 방법
+            - Java는 단일 상속을 지원하기 때문에 Thread Class를 상속받는 경우 다른 Class를 상속받을 수 없다.
+        * Runnable Interface를 구현하는 방법
+            - Java의 단일 상속으로 인해 Runnable Interface를 구현하는 방법이 일반적이다.
+            - 재사용성 (Reusability)이 높고 Code의 일관성 (Consistency)을 유지할 수 있기 때문에 보다 객체지향적인 방법이라 할 수 있다.
+            - Runnable Interface는 오로지 run()만 정의되어 있는 간단한 Interface이다.
+
+        * Thread Class => https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.html
+            - Thread Class를 상속받아 run()을 정의하면 된다.
+
+        * Runnable Interface => https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html
+            - Runnable Interface는 오로지 run()만 정의되어 있는 간단한 Interface이다.
+            - Runnable Interface에 정의되어 있는 abstract method인 run()을 정의하면 된다.
+            - Runnable Interface를 구현한 Class의 Instance를 생성한 다음 Thread의 생성자의 Parameter로 제공해야 한다.
+
+    * Thread의 실행
+        - Thread를 구현한 Class instance에서 start()를 호출하면 Thread가 실행된다.
+
+        - start()가 호출되었다고 해서 즉각 실행되는 것은 아니다.
+            ☑ Thread의 실행 순서는 OS Scheduler에 의해 결정된다.
+            ☑ 실행 대기 상태 (Runnable)에 있다가 자신의 차례가 되는 경우 실행된다.
+        - 한 번 실행이 종료된 Thread는 다시 실행할 수 없다.
+            ☑ 하나의 Thread에 대해 start()가 단 한 번만 호출 가능하며, 두 번 이상 호출하는 경우 IlleagalThreadStateException이 발생한다.
+
+        * run()을 호출하는 경우
+            - run()을 호출하는 것은 생성된 Thread를 실행시키는 것이 아니라 단순히 Class에 선언된 method를 호출하는 것이다.
+
+        * start()를 호출하는 이유
+            - run()을 호출하는 것은 생성된 Thread를 실행시키는 것이 아니라 단순히 Class에 선언된 method를 호출하는 것이다.
+                1. main()에서 Thread의 start()를 호출한다.
+                2. start()는 새로운 Thread를 생성하고, Thread 작업에 필요한 Call Stack을 생성한다.
+                3. 생성된 Thread의 Call Stack에 run()이 호출되어 독립된 공간에서 작업을 수행한다.
+                4. 2개의 Call Stack이 OS Scheduler가 정한 순서에 의해서 번갈아 가면서 실행된다.
+                    (주어진 시간 동안 작업을 완료하지 못한 Thread는 다시 자신의 차례가 돌아올 때까지 대기 상태로 기다린다.)
+
+    * Thread의 우선순위
+        - Thread의 Priority 값에 따라 Thread의 실행 시간을 다르게 설정할 수 있습니다.
+           ☑ 즉, 작업의 중요도에 따라 Thread의 우선순위를 서로 다르게 설정해 특정 Thread가 더 많은 작업시간을 갖도록 설정할 수 있다.
+
+        - Thread는 priority라는 Member Variable을 가지고 있으며, 이 값에 따라 Thread의 실행 시간이 달라진다.
+
+        - Thread가 가질 수 있는 우선순위의 범위는 1부터 10까지이며 숫자가 높을수록 우선순위가 높다.
+        ! 주의사항
+            -Thread를 실행하기 전에만 우선순위를 변경할 수 있다.
+            -Thread의 우선순위는 Thread를 생성한 Thread로 부터 상속받는다.
+
+
+    * Thread Group
+        - 서로 관련된 Thread를 Group으로 관리하기 위해 Thread Group을 제공한다.
+
+        - Thread Group은 Thread의 Set을 나타낸다.
+        - Thread Group을 생성해서 Thread를 Group으로 묶어서 관리할 수 있다.
+            ☑ Thread Group은 다른 Thread Group을 포함할 수 있다.
+        - Thread Group은 보안상의 이유로 도입되었다.
+        - 자신이 속한 Thread Group에 대한 정보 Access가 가능하다.
+            ☑ Thread Group의 Parent Thread Group이나 다른 Thread Group에 대한 정보에는 액세스할 수 없습니다.
+
+        * Initial Thread Group을 제외한 모든 Thread Group은 부모를 갖는 Tree를 형성한다.
+
+            - 모든 Thread는 반드시 Thread Group에 포함되어 있어야 한다.
+                ☑ Group을 지정하지 않고 Thread를 생성하는 경우, 기본적으로 자신을 생성한 Thread와 같은 Thread Group에 속하게 된다.
+            - 우리가 생성하는 모든 Thread Group은 main Thread Group의 하위 Thread Group이 된다.
+                ☑ Group을 지정하지 않고 Thread를 생성하는 경우, Thread는 자동적으로 main Thread Group에 속하게 된다.
+            - setMaxPriority()는 Thread가 Thread Group에 추가되기 이전에 호출해야 한다.
+
+    * Daemon Thread
+        - Daemon Thread는 Thread의 작업을 돕는 역할을 수행한다.
+
+        - Thread의 작업을 돕는 역할을 수행하는 Thread이다.
+        - Thread가 종료되는 경우 Daemon Thread는 자동 종료된다.
+            ☑ Daemon Thread가 보조적인 역할을 수행하기 때문에 Thread가 종료되면 Daemon Thread가 존재할 이유가 없다.
+        - Thread를 생성하고 실행하기 전 setDaemon(ture)을 호출해 주면 Daemon Thread로 생성된다.
+        - Daemon Thread가 생성한 Thread는 자동적으로 Daemon Thread가 된다.
+        - setDaemon method는 반드시 start()를 호출하기 전에 실행되어야 한다.
+            ☑ 그렇지 않으면 IllegalThreadStateException이 발생한다.
+
+    * Thread의 실행 제어
+        - 정교한 Scheduling을 통해 Process에게 주어진 자원을 여러 Thread가 효율적으로 사용해야한다.
+
+        - Synchronization과 Scheduling이 Thread Programming을 어렵게 만드는 요소이다.
+        - 효율적인 Multi-Thread Programming을 개발하기 위해서는 정교한 Scheduling을 통해 Process에게 주어진 자원을 낭비 없이 사용해야 한다.
+            ☑ 우선순위를 이용하여 Scheduling이 가능하지만 한계가 존재한다.
+        - 효율적인 Multi-Thread Programming을 개발을 위해서는 Thread State와 Thread Scheduling에 관련된 Method에 대해서 잘 알고있어야한다.
+
+        * Thread의 State
+            [NEW]           =>  Thread가 생성되고 아직 start()가 호출되지 않은 상태
+            [RUNNABLE]      =>  실행 가능한 상태
+            [BLOCKED]       =>  Lock이 풀릴 때까지 기다리는 상태
+            [WAITING]       =>  Thread의 작업이 종료되지 않았지만, 실행 가능하지 않은 (unrunnable) 일시정지 상태
+            [TIMED_WAITING] =>  일시정지시간이 지정된 상태를 의미
+            [TERMINATED]    =>  Thread의 작업이 종료된 상태
+
+    * Thread의 동기화
+        - 하나의 Thread가 진행 중인 작업을 다른 Thread가 방해하지 못하도록 하는 것을 Thread의 Synchronization이라고 한다.
+
+        - Single Thread Process의 경우 Process 내에서 단 하나의 Thread만 작업하기 때문에 문제가 발생하지 않는다.
+        - Multi Thread Process의 경우 여러 Thread가 같은 Process 내의 자원을 공유해서 작업하기 때문에 서로의 작업에 영향을 미칠 수 있다.
+        - 이런 일을 방지하기 위해 한 Thread가 특정 작업을 끝마치기 전까지 다른 Thread에 의해 방해받지 않도록 하는 것이 필요하다.
+        - 이러한 문제를 해결하기 위해 Critical Section과 Lock의 개념을 사용한다.
+            ☑ Shared Data를 사용하는 Code 영역을 Critical Section으로 지정한다.
+            ☑ Shared Data (Object)가 가지고 있는 Lock을 획득한 단 하나의 Thread만 이 영역의 Code를 수행할 수 있게 한다.
+            ☑ 해당 Thread가 Critical Section 내의 모든 Code를 수행한 뒤 Lock을 반환해 다른Thread가 수행할 수 있도록 해준다.
+        - JDK1.5부터 java.util.concurrent.locks와 java.util.concurrent.atomic Package를 통해 다양한 방식의 동기화를 지원한다.
+        - 모든 Object는 Lock을 가지고 있다.
