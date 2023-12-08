@@ -1,4 +1,4 @@
-package com.gmail.juyonglee0208.daemon;
+package Daemon;
 
 public class DaemonEx01 {
 
